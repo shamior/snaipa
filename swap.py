@@ -215,11 +215,11 @@ class Swapper():
             }
     def handle_task(self, list_of_hashes, sockets):
         for hash in list_of_hashes:
+            index = get_socket_index()
+            print(index)
+            socket = sockets[index]
+            locks[index].acquire()
             try:
-                index = get_socket_index()
-                print(index)
-                socket = sockets[index]
-                locks[index].acquire()
                 tx_data = socket.eth.get_transaction(hash)
                 locks[index].release()
                 gas = detector.detect(tx_data)
@@ -228,7 +228,7 @@ class Swapper():
                     self.gas = gas
                     break
             except w3_expts.TransactionNotFound:
-                pass
+                locks[index].release()
     def connect_to_node(self, provider):
         connected = False
         prov = None
