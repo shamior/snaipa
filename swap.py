@@ -263,10 +263,7 @@ class Swapper():
         start = time.perf_counter()
         while not self.event_found:
             loop_time = time.perf_counter()
-            try:
-                list_of_txns = pd_filter.get_new_entries()
-            except:
-                exit()
+            list_of_txns = pd_filter.get_new_entries()
             num_of_entries = len(list_of_txns)
             divided_entries = num_of_entries/num_of_threads
             threads = []
