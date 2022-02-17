@@ -234,10 +234,10 @@ class Swapper():
         elif 'wss:' in provider:
             prov = Web3.WebsocketProvider(provider)
         while not connected:
-            w3 = Web3(prov)
-            connected = w3.isConnected()
+            conexao = Web3(prov)
+            connected = conexao.isConnected()
         print(f"Connected to {provider}")
-        return w3
+        return conexao
     def wait_for_green_light(self):
         detector.possible_wallets.append(self.get_owner())
         self.event_found = False
@@ -258,48 +258,49 @@ class Swapper():
         print('FILTRUUUUUUUUUUUUUUUUUUUUU')
         pd_filter = self.w3.eth.filter('pending')
         start = time.perf_counter()
-        try:
-            while not self.event_found:
-                loop_time = time.perf_counter()
+        while not self.event_found:
+            loop_time = time.perf_counter()
+            try:
                 list_of_txns = pd_filter.get_new_entries()
-                num_of_entries = len(list_of_txns)
-                divided_entries = num_of_entries/num_of_threads
-                threads = []
-                if num_of_entries < num_of_threads:
-                    for i in range(math.ceil(num_of_entries/2)):
-                        threads.append(
-                            Thread(
-                                target=partial(
-                                    self.handle_task,
-                                    list_of_txns[
-                                        i*2:(i+1)*2
-                                    ],
-                                    sockets
-                                )
+            except:
+                exit()
+            num_of_entries = len(list_of_txns)
+            divided_entries = num_of_entries/num_of_threads
+            threads = []
+            if num_of_entries < num_of_threads:
+                for i in range(math.ceil(num_of_entries/2)):
+                    threads.append(
+                        Thread(
+                            target=partial(
+                                self.handle_task,
+                                list_of_txns[
+                                    i*2:(i+1)*2
+                                ],
+                                sockets
                             )
                         )
-                else:
-                    for i in range(num_of_threads):
-                        threads.append(
-                            Thread(
-                                target=partial(
-                                    self.handle_task,
-                                    list_of_txns[
-                                        math.ceil(i*divided_entries):math.ceil((i+1)*divided_entries)
-                                    ],
-                                    sockets
-                                )
+                    )
+            else:
+                for i in range(num_of_threads):
+                    threads.append(
+                        Thread(
+                            target=partial(
+                                self.handle_task,
+                                list_of_txns[
+                                    math.ceil(i*divided_entries):math.ceil((i+1)*divided_entries)
+                                ],
+                                sockets
                             )
                         )
-            cur_num_threads = len(threads)
-            for i in range(cur_num_threads):
-                threads[i].start()
-            for thread in threads:
-                thread.join()
-            print(f"Txs: {num_of_entries:<5}\t\tTime to proccess: {time.perf_counter()-loop_time:.3f}s\t\tWaiting time: {time.perf_counter()-start:.3f}s")
-            time.sleep(0.04)
-        except Exception:
-            exit()
+                    )
+        cur_num_threads = len(threads)
+        for i in range(cur_num_threads):
+            threads[i].start()
+        for thread in threads:
+            thread.join()
+        print(f"Txs: {num_of_entries:<5}\t\tTime to proccess: {time.perf_counter()-loop_time:.3f}s\t\tWaiting time: {time.perf_counter()-start:.3f}s")
+        time.sleep(0.04)
+
             
     def get_owner(self):
         w = self.tkn_contract.functions.owner().call().lower()
