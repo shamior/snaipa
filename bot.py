@@ -1,4 +1,3 @@
-from web3.main import Web3
 from swap import Swapper
 from os import system
 import time
@@ -29,7 +28,7 @@ def colored_text(color, msg):
 def approve_token():
     approve_str = ''
     print("\nTrying to approve the token...")
-    approval = swapper.approve(swapper.address['token'])
+    approval = swapper.approve(config.TOKEN)
     if approval['status']:
         if approval['tx_hash']:
             approve_str = colored_text(text.green, 'Approval Sucess!')
@@ -97,8 +96,8 @@ def log_buy(time_taken, txn):
 def wait_for_target(cur_log, target):
     cur_price = -1
     while cur_price < target:
-        cur_price = swapper.get_token_price(swapper.address['token'])
-        cur_price_str = f"Current Price: {cur_price:.9f}\n"
+        cur_price = swapper.get_token_price(config.TOKEN)
+        cur_price_str = f"Current Price: {cur_price:.12f}\n"
         system('clear')
         print(cur_log + cur_price_str)
     print(colored_text(text.green, 'Target Reached!'))
