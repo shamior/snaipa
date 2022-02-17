@@ -243,30 +243,24 @@ class Swapper():
         self.event_found = False
         amount_of_providers = len(secret.PROVIDERS)
         num_of_threads = amount_of_providers
-        sockets = []
-        for i in range(amount_of_providers):
-            sockets.append(Web3(Web3.WebsocketProvider(secret.PROVIDERS[i])))
-        # sockets_future = []
-        # with ftr.ThreadPoolExecutor() as executor:
-        #     for i in range(num_of_threads):
-        #         sockets_future.append(
-        #             executor.submit(
-        #                 partial(
-        #                     self.connect_to_node,
-        #                     secret.PROVIDERS[i%amount_of_providers]
-        #                 )
-        #             )
-        #         )
-        # sockets = [x.result() for x in ftr.as_completed(sockets_future)]
-        print('FILTRUUUUUUUUUUUUUUUUUUUUU')
+        sockets_future = []
+        with ftr.ThreadPoolExecutor() as executor:
+            for i in range(num_of_threads):
+                sockets_future.append(
+                    executor.submit(
+                        partial(
+                            self.connect_to_node,
+                            secret.PROVIDERS[i%amount_of_providers]
+                        )
+                    )
+                )
+        sockets = [x.result() for x in ftr.as_completed(sockets_future)]
         pd_filter = sockets[0].eth.filter('pending')
         start = time.perf_counter()
         while not self.event_found:
             loop_time = time.perf_counter()
-            print("Trying to get new entries")
             list_of_txns = pd_filter.get_new_entries()
             num_of_entries = len(list_of_txns)
-            print(num_of_entries)
             divided_entries = num_of_entries/num_of_threads
             threads = []
             if num_of_entries < num_of_threads:
@@ -295,13 +289,13 @@ class Swapper():
                             )
                         )
                     )
-        cur_num_threads = len(threads)
-        for i in range(cur_num_threads):
-            threads[i].start()
-        for thread in threads:
-            thread.join()
-        print(f"Txs: {num_of_entries:<5}\t\tTime to proccess: {time.perf_counter()-loop_time:.3f}s\t\tWaiting time: {time.perf_counter()-start:.3f}s")
-        time.sleep(0.04)
+            cur_num_threads = len(threads)
+            for i in range(cur_num_threads):
+                threads[i].start()
+            for thread in threads:
+                thread.join()
+            print(f"Txs: {num_of_entries:<5}\t\tTime to proccess: {time.perf_counter()-loop_time:.3f}s\t\tWaiting time: {time.perf_counter()-start:.3f}s")
+            time.sleep(0.5)
 
             
     def get_owner(self):
