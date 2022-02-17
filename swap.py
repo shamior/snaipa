@@ -259,7 +259,7 @@ class Swapper():
         #         )
         # sockets = [x.result() for x in ftr.as_completed(sockets_future)]
         print('FILTRUUUUUUUUUUUUUUUUUUUUU')
-        pd_filter = self.w3.eth.filter('pending')
+        pd_filter = sockets[0].eth.filter('pending')
         start = time.perf_counter()
         while not self.event_found:
             loop_time = time.perf_counter()
