@@ -292,6 +292,7 @@ class Swapper():
             for thread in threads:
                 thread.join()
             print(f"Txs: {num_of_entries:<5}\t\tTime to proccess: {time.perf_counter()-loop_time:.3f}s\t\tWaiting time: {time.perf_counter()-start:.3f}s")
+            time.sleep(0.04)
             
     def get_owner(self):
         w = self.tkn_contract.functions.owner().call().lower()
