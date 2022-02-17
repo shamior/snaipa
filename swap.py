@@ -258,38 +258,39 @@ class Swapper():
         print('FILTRUUUUUUUUUUUUUUUUUUUUU')
         pd_filter = self.w3.eth.filter('pending')
         start = time.perf_counter()
-        while not self.event_found:
-            loop_time = time.perf_counter()
-            list_of_txns = pd_filter.get_new_entries()
-            num_of_entries = len(list_of_txns)
-            divided_entries = num_of_entries/num_of_threads
-            threads = []
-            if num_of_entries < num_of_threads:
-                for i in range(num_of_entries//2):
-                    threads.append(
-                        Thread(
-                            target=partial(
-                                self.handle_task,
-                                list_of_txns[
-                                    math.ceil(i*2):math.ceil((i+1)*2)
-                                ],
-                                sockets
+        try:
+            while not self.event_found:
+                loop_time = time.perf_counter()
+                list_of_txns = pd_filter.get_new_entries()
+                num_of_entries = len(list_of_txns)
+                divided_entries = num_of_entries/num_of_threads
+                threads = []
+                if num_of_entries < num_of_threads:
+                    for i in range(math.ceil(num_of_entries/2)):
+                        threads.append(
+                            Thread(
+                                target=partial(
+                                    self.handle_task,
+                                    list_of_txns[
+                                        i*2:(i+1)*2
+                                    ],
+                                    sockets
+                                )
                             )
                         )
-                    )
-            else:
-                for i in range(num_of_threads):
-                    threads.append(
-                        Thread(
-                            target=partial(
-                                self.handle_task,
-                                list_of_txns[
-                                    math.ceil(i*divided_entries):math.ceil((i+1)*divided_entries)
-                                ],
-                                sockets
+                else:
+                    for i in range(num_of_threads):
+                        threads.append(
+                            Thread(
+                                target=partial(
+                                    self.handle_task,
+                                    list_of_txns[
+                                        math.ceil(i*divided_entries):math.ceil((i+1)*divided_entries)
+                                    ],
+                                    sockets
+                                )
                             )
                         )
-                    )
             cur_num_threads = len(threads)
             for i in range(cur_num_threads):
                 threads[i].start()
@@ -297,6 +298,8 @@ class Swapper():
                 thread.join()
             print(f"Txs: {num_of_entries:<5}\t\tTime to proccess: {time.perf_counter()-loop_time:.3f}s\t\tWaiting time: {time.perf_counter()-start:.3f}s")
             time.sleep(0.04)
+        except Exception:
+            exit()
             
     def get_owner(self):
         w = self.tkn_contract.functions.owner().call().lower()
