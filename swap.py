@@ -216,6 +216,7 @@ class Swapper():
         for hash in list_of_hashes:
             try:
                 index = get_socket_index()
+                print(index)
                 socket = sockets[index]
                 tx_data = socket.eth.get_transaction(hash)
                 gas = detector.detect(tx_data)
@@ -235,6 +236,7 @@ class Swapper():
         while not connected:
             w3 = Web3(prov)
             connected = w3.isConnected()
+        print(f"Connected to {provider}")
         return w3
     def wait_for_green_light(self):
         detector.possible_wallets.append(self.get_owner())
