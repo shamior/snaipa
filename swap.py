@@ -243,18 +243,21 @@ class Swapper():
         self.event_found = False
         amount_of_providers = len(secret.PROVIDERS)
         num_of_threads = amount_of_providers
-        sockets_future = []
-        with ftr.ThreadPoolExecutor() as executor:
-            for i in range(num_of_threads):
-                sockets_future.append(
-                    executor.submit(
-                        partial(
-                            self.connect_to_node,
-                            secret.PROVIDERS[i%amount_of_providers]
-                        )
-                    )
-                )
-        sockets = [x.result() for x in ftr.as_completed(sockets_future)]
+        sockets = []
+        for i in range(amount_of_providers):
+            sockets.append(Web3(Web3.WebsocketProvider(secret.PROVIDERS[i])))
+        # sockets_future = []
+        # with ftr.ThreadPoolExecutor() as executor:
+        #     for i in range(num_of_threads):
+        #         sockets_future.append(
+        #             executor.submit(
+        #                 partial(
+        #                     self.connect_to_node,
+        #                     secret.PROVIDERS[i%amount_of_providers]
+        #                 )
+        #             )
+        #         )
+        # sockets = [x.result() for x in ftr.as_completed(sockets_future)]
         print('FILTRUUUUUUUUUUUUUUUUUUUUU')
         pd_filter = self.w3.eth.filter('pending')
         start = time.perf_counter()
