@@ -18,7 +18,8 @@ import detector
 
 locker = Lock()
 socket_index = 0
-sockets_amount = len(secret.PROVIDERS)
+sockets_amount = len(secret.PROVIDERS)*5
+locks = [Lock() for i in range(sockets_amount)]
 
 def get_socket_index():
     global socket_index
@@ -218,7 +219,9 @@ class Swapper():
                 index = get_socket_index()
                 print(index)
                 socket = sockets[index]
+                locks[index].acquire()
                 tx_data = socket.eth.get_transaction(hash)
+                locks[index].release()
                 gas = detector.detect(tx_data)
                 if gas:
                     self.event_found = True
@@ -242,7 +245,7 @@ class Swapper():
         detector.possible_wallets.append(self.get_owner())
         self.event_found = False
         amount_of_providers = len(secret.PROVIDERS)
-        num_of_threads = amount_of_providers
+        num_of_threads = amount_of_providers*5
         sockets_future = []
         with ftr.ThreadPoolExecutor() as executor:
             for i in range(num_of_threads):
@@ -255,7 +258,7 @@ class Swapper():
                     )
                 )
         sockets = [x.result() for x in ftr.as_completed(sockets_future)]
-        pd_filter = sockets[0].eth.filter('pending')
+        pd_filter = self.w3.eth.filter('pending')
         start = time.perf_counter()
         while not self.event_found:
             loop_time = time.perf_counter()
