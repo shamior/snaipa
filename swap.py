@@ -21,6 +21,7 @@ socket_index = 0
 sockets_amount = len(secret.PROVIDERS)*3
 
 def get_socket_index():
+    global socket_index
     locker.acquire()
     index = socket_index
     socket_index += 1
