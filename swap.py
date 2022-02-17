@@ -18,7 +18,7 @@ import detector
 
 locker = Lock()
 socket_index = 0
-sockets_amount = len(secret.PROVIDERS)*3
+sockets_amount = len(secret.PROVIDERS)
 
 def get_socket_index():
     global socket_index
@@ -242,7 +242,7 @@ class Swapper():
         detector.possible_wallets.append(self.get_owner())
         self.event_found = False
         amount_of_providers = len(secret.PROVIDERS)
-        num_of_threads = amount_of_providers*3
+        num_of_threads = amount_of_providers
         sockets_future = []
         with ftr.ThreadPoolExecutor() as executor:
             for i in range(num_of_threads):
